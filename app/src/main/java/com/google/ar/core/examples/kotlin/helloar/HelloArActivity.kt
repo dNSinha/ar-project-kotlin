@@ -33,12 +33,20 @@ import com.google.ar.core.exceptions.UnavailableApkTooOldException
 import com.google.ar.core.exceptions.UnavailableDeviceNotCompatibleException
 import com.google.ar.core.exceptions.UnavailableSdkTooOldException
 import com.google.ar.core.exceptions.UnavailableUserDeclinedInstallationException
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 
 /**
  * This is a simple example that shows how to create an augmented reality (AR) application using the
  * ARCore API. The application will display any detected planes and will allow the user to tap on a
  * plane to place a 3D model.
  */
+
+
+const val BASE_URL = "https://api.polygon.io/v1/open-close/"
 class HelloArActivity : AppCompatActivity() {
   companion object {
     private const val TAG = "HelloArActivity"
@@ -92,6 +100,38 @@ class HelloArActivity : AppCompatActivity() {
 
     depthSettings.onCreate(this)
     instantPlacementSettings.onCreate(this)
+
+
+    getStocks()
+  }
+
+  private fun getStocks() {
+    val retrofitBuilder = Retrofit.Builder()
+      .addConverterFactory(GsonConverterFactory.create())
+      .baseUrl(BASE_URL)
+      .build()
+      .create(ApiInterface::class.java)
+
+     val retrofitData = retrofitBuilder.getData("IBM")
+
+    retrofitData.enqueue(object : Callback<StocksData?> {
+      override fun onResponse(call: Call<StocksData?>, response: Response<StocksData?>) {
+        val responseBody = response.body()!!
+
+        val myStringBuilder = StringBuilder()
+        myStringBuilder.append(responseBody.open)
+        myStringBuilder.append(responseBody.close)
+        myStringBuilder.append(responseBody.from)
+        myStringBuilder.append(responseBody.symbol)
+
+        Log.d("STOCKS", responseBody.toString())
+      }
+
+      override fun onFailure(call: Call<StocksData?>, t: Throwable) {
+        Log.d("ERROR", "onFailure"+t.message)
+      }
+    })
+
   }
 
   // Configure the session, using Lighting Estimation, and Depth mode.
