@@ -34,4 +34,7 @@
   <string translatable="false" name="searching_planes">Searching for surfaces...</string>
   <string translatable="false" name="waiting_taps">Tap on a surface to place an object.</string>
 
+  <string name="big_lamp">Big Lamp</string>
+  <string name="small_table">small table</string>
+
 </resources>

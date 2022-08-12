@@ -96,34 +96,39 @@ class HelloArActivity : AppCompatActivity() {
     setContentView(view.root)
 
     // Sets up an example renderer using our HelloARRenderer.
-    SampleRender(view.surfaceView, renderer, assets)
+    SampleRender(view.surfaceView, renderer, assets, view)
 
     depthSettings.onCreate(this)
     instantPlacementSettings.onCreate(this)
 
 
-    getStocks()
+    getStocks("IBM")
   }
 
-  private fun getStocks() {
+  private fun getStocks(companyId: String) {
     val retrofitBuilder = Retrofit.Builder()
       .addConverterFactory(GsonConverterFactory.create())
       .baseUrl(BASE_URL)
       .build()
       .create(ApiInterface::class.java)
 
-     val retrofitData = retrofitBuilder.getData("IBM")
+     val retrofitData = retrofitBuilder.getData(companyId)
 
     retrofitData.enqueue(object : Callback<StocksData?> {
       override fun onResponse(call: Call<StocksData?>, response: Response<StocksData?>) {
-        val responseBody = response.body()!!
+        var responseBody = response.body()!!
 
         val myStringBuilder = StringBuilder()
-        myStringBuilder.append(responseBody.open)
-        myStringBuilder.append(responseBody.close)
-        myStringBuilder.append(responseBody.from)
-        myStringBuilder.append(responseBody.symbol)
+        myStringBuilder.append("Open" + responseBody.open)
+        myStringBuilder.append("\n")
+        myStringBuilder.append("Close" + responseBody.close)
+        myStringBuilder.append("\n")
+        myStringBuilder.append("Date" + responseBody.from)
+        myStringBuilder.append("\n")
+        myStringBuilder.append("Symbol" + responseBody.symbol)
+        myStringBuilder.append("\n")
 
+        view.textId.text = myStringBuilder
         Log.d("STOCKS", responseBody.toString())
       }
 

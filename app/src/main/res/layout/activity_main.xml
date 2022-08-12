@@ -35,4 +35,30 @@
       android:src="@drawable/ic_settings"
       android:background="@android:color/transparent"/>
 
+  <ImageButton
+      android:id="@+id/bigLamp"
+      android:layout_width="60dp"
+      android:layout_height="60dp"
+      android:layout_marginLeft="5dp"
+      android:contentDescription="@string/big_lamp"
+      android:src="@drawable/lamp_thumb" />
+
+  <ImageButton
+      android:id="@+id/smallTable"
+      android:layout_width="60dp"
+      android:layout_height="60dp"
+      android:layout_marginLeft="80dp"
+      android:contentDescription="@string/small_table"
+      android:src="@drawable/smalltable" />
+
+  <TextView
+      android:id="@+id/textId"
+      android:layout_width="135dp"
+      android:layout_height="113dp"
+      android:textColor="#ff0000"
+      android:layout_marginStart="100dp"
+      android:layout_marginTop="50dp"
+      android:layout_marginEnd="25dp"
+      android:layout_marginBottom="25dp" />
+
 </RelativeLayout>

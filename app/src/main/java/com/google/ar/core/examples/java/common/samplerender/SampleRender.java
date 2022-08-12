@@ -18,6 +18,10 @@ package com.google.ar.core.examples.java.common.samplerender;
 import android.content.res.AssetManager;
 import android.opengl.GLES30;
 import android.opengl.GLSurfaceView;
+import android.view.View;
+
+import com.google.ar.core.examples.kotlin.helloar.HelloArView;
+
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
@@ -29,6 +33,7 @@ public class SampleRender {
 
   private int viewportWidth = 1;
   private int viewportHeight = 1;
+  public HelloArView view;
 
   /**
    * Constructs a SampleRender object and instantiates GLSurfaceView parameters.
@@ -37,8 +42,9 @@ public class SampleRender {
    * @param renderer Renderer implementation to receive callbacks
    * @param assetManager AssetManager for loading Android resources
    */
-  public SampleRender(GLSurfaceView glSurfaceView, Renderer renderer, AssetManager assetManager) {
+  public SampleRender(GLSurfaceView glSurfaceView, Renderer renderer, AssetManager assetManager, HelloArView view) {
     this.assetManager = assetManager;
+    this.view = view;
     glSurfaceView.setPreserveEGLContextOnPause(true);
     glSurfaceView.setEGLContextClientVersion(3);
     glSurfaceView.setEGLConfigChooser(8, 8, 8, 8, 16, 0);

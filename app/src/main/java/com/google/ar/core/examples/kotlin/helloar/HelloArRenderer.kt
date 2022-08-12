@@ -46,6 +46,11 @@ import com.google.ar.core.examples.java.common.samplerender.arcore.PlaneRenderer
 import com.google.ar.core.examples.java.common.samplerender.arcore.SpecularCubemapFilter
 import com.google.ar.core.exceptions.CameraNotAvailableException
 import com.google.ar.core.exceptions.NotYetAvailableException
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 import java.io.IOException
 import java.nio.ByteBuffer
 
@@ -204,42 +209,42 @@ class HelloArRenderer(val activity: HelloArActivity) :
       pointCloudMesh =
         Mesh(render, Mesh.PrimitiveMode.POINTS, /*indexBuffer=*/ null, pointCloudVertexBuffers)
 
-      // Virtual object to render (ARCore pawn)
-      virtualObjectAlbedoTexture =
-        Texture.createFromAsset(
-          render,
-          "models/pawn_albedo.png",
-          Texture.WrapMode.CLAMP_TO_EDGE,
-          Texture.ColorFormat.SRGB
-        )
-
-      virtualObjectAlbedoInstantPlacementTexture =
-        Texture.createFromAsset(
-          render,
-          "models/pawn_albedo_instant_placement.png",
-          Texture.WrapMode.CLAMP_TO_EDGE,
-          Texture.ColorFormat.SRGB
-        )
-
-      val virtualObjectPbrTexture =
-        Texture.createFromAsset(
-          render,
-          "models/pawn_roughness_metallic_ao.png",
-          Texture.WrapMode.CLAMP_TO_EDGE,
-          Texture.ColorFormat.LINEAR
-        )
-      virtualObjectMesh = Mesh.createFromAsset(render, "models/pawn.obj")
-      virtualObjectShader =
-        Shader.createFromAssets(
-            render,
-            "shaders/environmental_hdr.vert",
-            "shaders/environmental_hdr.frag",
-            mapOf("NUMBER_OF_MIPMAP_LEVELS" to cubemapFilter.numberOfMipmapLevels.toString())
-          )
-          .setTexture("u_AlbedoTexture", virtualObjectAlbedoTexture)
-          .setTexture("u_RoughnessMetallicAmbientOcclusionTexture", virtualObjectPbrTexture)
-          .setTexture("u_Cubemap", cubemapFilter.filteredCubemapTexture)
-          .setTexture("u_DfgTexture", dfgTexture)
+//      // Virtual object to render (ARCore pawn)
+//      virtualObjectAlbedoTexture =
+//        Texture.createFromAsset(
+//          render,
+//          "models/pawn_albedo.png",
+//          Texture.WrapMode.CLAMP_TO_EDGE,
+//          Texture.ColorFormat.SRGB
+//        )
+//
+//      virtualObjectAlbedoInstantPlacementTexture =
+//        Texture.createFromAsset(
+//          render,
+//          "models/pawn_albedo_instant_placement.png",
+//          Texture.WrapMode.CLAMP_TO_EDGE,
+//          Texture.ColorFormat.SRGB
+//        )
+//
+//      val virtualObjectPbrTexture =
+//        Texture.createFromAsset(
+//          render,
+//          "models/pawn_roughness_metallic_ao.png",
+//          Texture.WrapMode.CLAMP_TO_EDGE,
+//          Texture.ColorFormat.LINEAR
+//        )
+//      virtualObjectMesh = Mesh.createFromAsset(render, "models/pawn.obj")
+//      virtualObjectShader =
+//        Shader.createFromAssets(
+//            render,
+//            "shaders/environmental_hdr.vert",
+//            "shaders/environmental_hdr.frag",
+//            mapOf("NUMBER_OF_MIPMAP_LEVELS" to cubemapFilter.numberOfMipmapLevels.toString())
+//          )
+//          .setTexture("u_AlbedoTexture", virtualObjectAlbedoTexture)
+//          .setTexture("u_RoughnessMetallicAmbientOcclusionTexture", virtualObjectPbrTexture)
+//          .setTexture("u_Cubemap", cubemapFilter.filteredCubemapTexture)
+//          .setTexture("u_DfgTexture", dfgTexture)
     } catch (e: IOException) {
       Log.e(TAG, "Failed to read a required asset file", e)
       showError("Failed to read a required asset file: $e")
@@ -251,7 +256,104 @@ class HelloArRenderer(val activity: HelloArActivity) :
     virtualSceneFramebuffer.resize(width, height)
   }
 
+  fun getStocks(companyName: String) {
+    val retrofitBuilder = Retrofit.Builder()
+      .addConverterFactory(GsonConverterFactory.create())
+      .baseUrl(BASE_URL)
+      .build()
+      .create(ApiInterface::class.java)
+
+    val retrofitData = retrofitBuilder.getData(companyName)
+
+    retrofitData.enqueue(object : Callback<StocksData?> {
+      override fun onResponse(call: Call<StocksData?>, response: Response<StocksData?>) {
+        val responseBody = response.body()!!
+
+        val myStringBuilder = StringBuilder()
+        myStringBuilder.append(responseBody.open)
+        myStringBuilder.append(responseBody.close)
+        myStringBuilder.append(responseBody.from)
+        myStringBuilder.append(responseBody.symbol)
+
+        render.view.textId.text = myStringBuilder
+        Log.d("STOCKS", responseBody.toString())
+      }
+
+      override fun onFailure(call: Call<StocksData?>, t: Throwable) {
+        Log.d("ERROR", "onFailure"+t.message)
+      }
+    })
+  }
+
   override fun onDrawFrame(render: SampleRender) {
+    var lampPressed = false
+    var tablePressed = true
+    var assetName = "models/model.obj"
+    render.view.lampImage.setOnClickListener{
+      lampPressed = true;
+      tablePressed = false
+      //Calling from this method is forcing app to close
+      getStocks("IBM") //IBM Stock
+      Log.d("DRAW", "lampImage  "+lampPressed.toString())
+      Log.d("DRAW", "tableImage  "+tablePressed.toString())
+    }
+
+    render.view.tableImage.setOnClickListener{
+      lampPressed = false;
+      tablePressed = true;
+      getStocks("ACN") //ACN Stock
+      Log.d("DRAW", "lampImage  "+lampPressed.toString())
+      Log.d("DRAW", "tableImage  "+tablePressed.toString())
+    }
+
+
+    // Virtual object to render (ARCore pawn)
+    virtualObjectAlbedoTexture =
+      Texture.createFromAsset(
+        render,
+        "models/pawn_albedo.png",
+        Texture.WrapMode.CLAMP_TO_EDGE,
+        Texture.ColorFormat.SRGB
+      )
+
+    virtualObjectAlbedoInstantPlacementTexture =
+      Texture.createFromAsset(
+        render,
+        "models/pawn_albedo_instant_placement.png",
+        Texture.WrapMode.CLAMP_TO_EDGE,
+        Texture.ColorFormat.SRGB
+      )
+
+    val virtualObjectPbrTexture =
+      Texture.createFromAsset(
+        render,
+        "models/pawn_roughness_metallic_ao.png",
+        Texture.WrapMode.CLAMP_TO_EDGE,
+        Texture.ColorFormat.LINEAR
+      )
+
+    if (lampPressed)
+    {
+      assetName = "models/pawn.obj"
+    } else if (tablePressed) {
+      assetName = "models/model.obj"
+    }
+
+    virtualObjectMesh = Mesh.createFromAsset(render, assetName)
+
+    virtualObjectShader =
+      Shader.createFromAssets(
+        render,
+        "shaders/environmental_hdr.vert",
+        "shaders/environmental_hdr.frag",
+        mapOf("NUMBER_OF_MIPMAP_LEVELS" to cubemapFilter.numberOfMipmapLevels.toString())
+      )
+        .setTexture("u_AlbedoTexture", virtualObjectAlbedoTexture)
+        .setTexture("u_RoughnessMetallicAmbientOcclusionTexture", virtualObjectPbrTexture)
+        .setTexture("u_Cubemap", cubemapFilter.filteredCubemapTexture)
+        .setTexture("u_DfgTexture", dfgTexture)
+
+
     val session = session ?: return
 
     // Texture names should only be set once on a GL thread unless they change. This is done during

@@ -17,9 +17,11 @@ package com.google.ar.core.examples.kotlin.helloar
 
 import android.content.res.Resources
 import android.opengl.GLSurfaceView
+import android.util.Log
 import android.view.View
 import android.widget.ImageButton
 import android.widget.PopupMenu
+import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
@@ -47,6 +49,11 @@ class HelloArView(val activity: HelloArActivity) : DefaultLifecycleObserver {
         }
       }
     }
+
+  //Capturing the images click
+  val lampImage = root.findViewById<ImageButton>(R.id.bigLamp)
+  val tableImage = root.findViewById<ImageButton>(R.id.smallTable)
+  val textId = root.findViewById<TextView>(R.id.textId)
 
   val session
     get() = activity.arCoreSessionHelper.session
